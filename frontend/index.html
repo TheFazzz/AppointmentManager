@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Appointment Manager</h1>
+        <nav>
+            <ul>
+                <!-- Content will be replaced by JavaScript, pending if user is logged in -->
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Create Appointment</h2>
+            <form id="createEventForm">
+                <input type="text" id="title" placeholder="Event Title" required>
+                <textarea id="description" placeholder="Description"></textarea>
+                <input type="datetime-local" id="start_time" required>
+                <input type="datetime-local" id="end_time" required>
+                <button type="submit">Create Event</button>
+            </form>
+        </section>
+        <section id="eventList">
+            <h2>Your Appointments</h2>
+            <ul></ul>
+        </section>
+    </main>
+    <footer>
+        <p>Appointment Manager App © 2024</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
