@@ -61,7 +61,7 @@ function fetchEvents() {
     })
     .then(response => response.json())
     .then(events => {
-        const eventList = document.querySelector('#eventList ul');
+        const eventList = document.querySelector('.appointment-list ul');
         eventList.innerHTML = '';
         events.forEach(event => {
             const li = document.createElement('li');

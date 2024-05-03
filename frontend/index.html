@@ -16,20 +16,34 @@
         </nav>
     </header>
     <main>
-        <section>
-            <h2>Create Appointment</h2>
-            <form id="createEventForm">
-                <input type="text" id="title" placeholder="Event Title" required>
-                <textarea id="description" placeholder="Description"></textarea>
-                <input type="datetime-local" id="start_time" required>
-                <input type="datetime-local" id="end_time" required>
-                <button type="submit">Create Event</button>
-            </form>
-        </section>
-        <section id="eventList">
-            <h2>Your Appointments</h2>
-            <ul></ul>
-        </section>
+        <div class="content-container">
+            <section class="appointment-form">
+                <h2>Create Appointment</h2>
+                <form id="createEventForm">
+                    <div class="form-group">
+                        <label for="title">Event Title:</label>
+                        <input type="text" id="title" placeholder="Enter event title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea id="description" placeholder="Describe the event"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="start_time">Start Time:</label>
+                        <input type="datetime-local" id="start_time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_time">End Time:</label>
+                        <input type="datetime-local" id="end_time" required>
+                    </div>
+                    <button type="submit">Create Event</button>
+                </form>
+            </section>
+            <section id="appointment-list" class="appointment-list">
+                <h2>Your Appointments</h2>
+                <ul></ul>
+            </section>
+        </div>
     </main>
     <footer>
         <p>Appointment Manager App © 2024</p>
