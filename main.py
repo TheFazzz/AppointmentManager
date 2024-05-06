@@ -169,6 +169,44 @@ def get_user_events(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
     
+@app.put("/users/events/{event_id}")
+def update_user_event(
+    event_id: int,
+    req: CreateEventRequest,
+    user = Depends(get_current_user),  
+    db: sqlite3.Connection = Depends(get_db)  
+):
+    cursor = db.cursor()
+
+    try:
+        user_id = int(user["sub"])
+        
+        # Check if the event belongs to the user
+        cursor.execute("SELECT user_id FROM Events WHERE event_id = ?", (event_id,))
+        event = cursor.fetchone()
+        if not event or event[0] != user_id:
+            raise HTTPException(status_code=404, detail="Event not found or not accessible")
+
+        # Update the event
+        cursor.execute(
+            """
+            UPDATE Events
+            SET title = ?, description = ?, start_time = ?, end_time = ?
+            WHERE event_id = ? AND user_id = ?
+            """,
+            (req.title, req.description, req.start_time, req.end_time, event_id, user_id)
+        )
+
+        db.commit()
+
+        return {"message": "Event updated successfully"}
+
+    except sqlite3.IntegrityError as e:
+        raise HTTPException(status_code=400, detail="Invalid data")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
 @app.delete("/users/events/{event_id}", status_code=204)
 def delete_user_event(
     event_id: int,

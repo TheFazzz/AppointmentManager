@@ -41,7 +41,40 @@
             </section>
             <section id="appointment-list" class="appointment-list">
                 <h2>Your Appointments</h2>
-                <ul></ul>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id = eventTableBody>
+                        <!-- Update Event Modal -->
+                        <div id="updateModel" class="model" style="display: none;">
+                            <div class="model-content">
+                                <span id="close-button" class="close-button" style="cursor: pointer;">×</span>
+                                <h2>Update Event</h2>
+                                <form id="updateEventForm">
+                                    <label for="updateTitle">Title:</label>
+                                    <input type="text" id="updateTitle" name="title" required>
+
+                                    <label for="updateStartTime">Start Time:</label>
+                                    <input type="datetime-local" id="updateStartTime" name="start_time" required>
+
+                                    <label for="updateEndTime">End Time:</label>
+                                    <input type="datetime-local" id="updateEndTime" name="end_time" required>
+
+                                    <input type="hidden" id="updateEventId">
+
+                                    <button type="submit">Update Event</button>
+                                </form>
+                            </div>
+                        </div>
+
+                    </tbody>
+                </table>
             </section>
         </div>
     </main>

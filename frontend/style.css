@@ -44,3 +44,19 @@ button:hover {
 textarea {
     height: 100px; /* Sufficient height to type longer descriptions */
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid black ;
+    padding: 8px;
+    text-align: left;
+}
+
+button {
+    margin-right: 5px;
+    padding: 5px 10px;
+}

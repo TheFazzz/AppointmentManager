@@ -53,21 +53,110 @@ function createEvent(eventData) {
     });
 }
 
+function showModel(event) {
+    document.getElementById('updateModel').style.display = 'block';
+    document.getElementById('updateTitle').value = event.title;
+    document.getElementById('updateStartTime').value = event.start_time;
+    document.getElementById('updateEndTime').value = event.end_time;
+    document.getElementById('updateEventId').value = event.event_id;
+}
+
+document.querySelectorAll('.close-button').forEach(button => {
+    button.onclick = function() {
+        document.getElementById('updateModal').style.display = 'none';
+    };
+});
+
+document.getElementById('updateEventForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    updateEvent();
+});
+
+function updateEvent() {
+    const eventId = document.getElementById('updateEventId').value;
+    const title = document.getElementById('updateTitle').value;
+    const startTime = document.getElementById('updateStartTime').value;
+    const endTime = document.getElementById('updateEndTime').value;
+
+    fetch(`/users/events/${eventId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+        body: JSON.stringify({ title, start_time: startTime, end_time: endTime })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to update event');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Event updated successfully:', data);
+        document.getElementById('updateModel').style.display = 'none';
+        fetchEvents();  // Refresh the event list
+    })
+    .catch(error => {
+        console.error('Error updating event:', error);
+        alert('Failed to update event');
+    })
+}
+
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(dateString).toLocaleString('en-US', options);
+}
+
 function fetchEvents() {
     fetch('/users/events', {
         headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}` 
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         },
     })
     .then(response => response.json())
     .then(events => {
-        const eventList = document.querySelector('.appointment-list ul');
-        eventList.innerHTML = '';
+        const tableBody = document.querySelector('#eventTableBody');
+        tableBody.innerHTML = ''; // Clear the table body to remove previous rows
+
+        document.getElementById('close-button').onclick = () => {
+            document.getElementById('updateModel').style.display = 'none'
+        }
+
         events.forEach(event => {
-            const li = document.createElement('li');
-            li.textContent = `${event.title} - ${event.start_time} to ${event.end_time}`;
-            eventList.appendChild(li);
+            const row = tableBody.insertRow(); // Create a new table row
+
+            // Insert cells for the event title, start time, and end time
+            const titleCell = row.insertCell();
+            titleCell.textContent = event.title;
+
+            const startCell = row.insertCell();
+            startCell.textContent = formatDate(event.start_time);
+
+            const endCell = row.insertCell();
+            endCell.textContent = formatDate(event.end_time);
+
+            // Create action cell for buttons
+            const actionCell = row.insertCell();
+
+            // Create update button
+            const updateButton = document.createElement('button');
+            updateButton.textContent = 'Update';
+            updateButton.onclick = () => {
+                document.getElementById('updateModel').style.display = 'block'
+                console.log('Update Event:', event.event_id); // Placeholder for update functionality
+            };
+            actionCell.appendChild(updateButton);
+
+            // Create delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = () => {
+                console.log('Delete Event:', event.event_id); // Placeholder for delete functionality
+            };
+            actionCell.appendChild(deleteButton);
         });
     })
     .catch(error => console.log('Error:', error));
 }
+
