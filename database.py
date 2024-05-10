@@ -15,7 +15,7 @@ import os
 
 def get_db() -> Generator:
     try:
-        conn = sqlite3.connect("database.db")
+        conn = sqlite3.connect("database.db", check_same_thread=False)
         conn.row_factory = sqlite3.Row  # This allows you to access columns by names
         yield conn
     finally:

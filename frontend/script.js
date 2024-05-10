@@ -1,12 +1,14 @@
 document.addEventListener("DOMContentLoaded", function() {
     const nav = document.querySelector('nav ul');
     const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const main = document.querySelector('main');
 
+    // render data depending on if user is logged in or not
     if (isLoggedIn === "true") {
+        main.style.display = 'block';
         nav.innerHTML = `
-            <li><a href="appointments.html">My Appointments</a></li>
             <li><a href="profile.html">Profile</a></li>
-            <li><a href="logout.html" onclick="logout()">Logout</a></li>
+            <li><a href="index.html" onclick="logout()">Logout</a></li>
         `;
         fetchEvents();
     } else {
@@ -14,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function() {
             <li><a href="login.html">Login</a></li>
             <li><a href="register.html">Register</a></li>
         `;
-        //window.location.href = 'login.html'; // Redirect if not logged in
     }
 
     const form = document.getElementById('createEventForm');
@@ -34,6 +35,7 @@ function logout() {
     window.location.href = 'login.html';
 }
 
+// POST for user to create new events
 function createEvent(eventData) {
     fetch('/users/create-event', {
         method: 'POST',
@@ -43,24 +45,24 @@ function createEvent(eventData) {
         },
         body: JSON.stringify(eventData)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to create the event due to a scheduling conflict or other issue');
+        }
+        return response.json();
+    })
     .then(data => {
         console.log('Success:', data);
+        alert('Event created successfully!');
         fetchEvents(); // Reload events after creation
     })
     .catch((error) => {
         console.error('Error:', error);
+        alert(error.message); // Display a more user-friendly error message
     });
 }
 
-function showModel(event) {
-    document.getElementById('updateModel').style.display = 'block';
-    document.getElementById('updateTitle').value = event.title;
-    document.getElementById('updateStartTime').value = event.start_time;
-    document.getElementById('updateEndTime').value = event.end_time;
-    document.getElementById('updateEventId').value = event.event_id;
-}
-
+// close update event form
 document.querySelectorAll('.close-button').forEach(button => {
     button.onclick = function() {
         document.getElementById('updateModal').style.display = 'none';
@@ -69,14 +71,34 @@ document.querySelectorAll('.close-button').forEach(button => {
 
 document.getElementById('updateEventForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    updateEvent();
+    const eventId = document.getElementById('updateEventId').value;
+    updateEvent(eventId);
 });
 
-function updateEvent() {
-    const eventId = document.getElementById('updateEventId').value;
+function populateUpdateModel(event) {
+    document.getElementById('updateModel').style.display = 'block';
+    document.getElementById('updateTitle').value = event.title;
+    document.getElementById('updateDescription').value = event.description;
+    document.getElementById('updateStartTime').value = event.start_time;
+    document.getElementById('updateEndTime').value = event.end_time;
+    document.getElementById('updateEventId').value = event.event_id;
+}
+
+function updateEvent(eventId) {
+    const payload = {};
+    if(!eventId) return('no eventId');
+    // Retrieve values from the form and add to payload if non-empty
     const title = document.getElementById('updateTitle').value;
+    const description = document.getElementById('updateDescription').value;
+
+    if (title) payload.title = title;
+    if (description) payload.description = description;
+
     const startTime = document.getElementById('updateStartTime').value;
     const endTime = document.getElementById('updateEndTime').value;
+
+    if (startTime) payload.start_time = startTime;
+    if (endTime) payload.end_time = endTime;
 
     fetch(`/users/events/${eventId}`, {
         method: 'PUT',
@@ -84,7 +106,7 @@ function updateEvent() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         },
-        body: JSON.stringify({ title, start_time: startTime, end_time: endTime })
+        body: JSON.stringify(payload)
     })
     .then(response => {
         if (!response.ok) {
@@ -103,6 +125,7 @@ function updateEvent() {
     })
 }
 
+// format datetime in prettier format
 function formatDate(dateString) {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleString('en-US', options);
@@ -124,11 +147,14 @@ function fetchEvents() {
         }
 
         events.forEach(event => {
+            console.log(event);
             const row = tableBody.insertRow(); // Create a new table row
 
-            // Insert cells for the event title, start time, and end time
             const titleCell = row.insertCell();
             titleCell.textContent = event.title;
+
+            const descriptionCell = row.insertCell();
+            descriptionCell.textContent = event.description || 'No description';
 
             const startCell = row.insertCell();
             startCell.textContent = formatDate(event.start_time);
@@ -144,7 +170,8 @@ function fetchEvents() {
             updateButton.textContent = 'Update';
             updateButton.onclick = () => {
                 document.getElementById('updateModel').style.display = 'block'
-                console.log('Update Event:', event.event_id); // Placeholder for update functionality
+                document.getElementById('updateEventId').value = event.event_id;
+                populateUpdateModel(event);
             };
             actionCell.appendChild(updateButton);
 
@@ -152,7 +179,7 @@ function fetchEvents() {
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
             deleteButton.onclick = () => {
-                console.log('Delete Event:', event.event_id); // Placeholder for delete functionality
+                deleteEvent(event.event_id);
             };
             actionCell.appendChild(deleteButton);
         });
@@ -160,3 +187,26 @@ function fetchEvents() {
     .catch(error => console.log('Error:', error));
 }
 
+function deleteEvent(eventId) {
+    fetch(`/users/events/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`, 
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to delete the event');
+        }
+        return response.json(); 
+    })
+    .then(data => {
+        console.log('Event deleted successfully:', data);
+        fetchEvents();  // Refresh the event list
+    })
+    .catch(error => {
+        console.error('Error deleting event:', error);
+        alert('Failed to delete event: ' + error.message);
+    });
+}

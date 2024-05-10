@@ -25,3 +25,9 @@ class Event(BaseModel):
     description: str
     start_time: datetime
     end_time: datetime
+    
+class UpdateEventRequest(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
