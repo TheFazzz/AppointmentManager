@@ -37,15 +37,15 @@ uvicorn main:app --reload
 ```
 http://127.0.0.1:8000/static/index.html
 ```
-* Stop server: (run command)
-```
-crtl-c
-```
 * You can register a new account and login
 * Or you may use an existing account with data:
 ```
 Email: david@gmail.com
 Password: Student1
+```
+* To Stop server: (run command)
+```
+crtl-c
 ```
 ## Help
 
