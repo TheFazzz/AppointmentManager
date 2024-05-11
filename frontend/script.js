@@ -17,18 +17,33 @@ document.addEventListener("DOMContentLoaded", function() {
             <li><a href="register.html">Register</a></li>
         `;
     }
-
-    const form = document.getElementById('createEventForm');
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const title = document.getElementById('title').value;
-        const description = document.getElementById('description').value;
-        const start_time = document.getElementById('start_time').value;
-        const end_time = document.getElementById('end_time').value;
-
-        createEvent({ title, description, start_time, end_time });
-    });
 });
+
+
+// Form for User create new Event
+const form = document.getElementById('createEventForm');
+form.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const title = document.getElementById('title').value;
+    const description = document.getElementById('description').value;
+    const start_time = document.getElementById('start_time').value;
+    const end_time = document.getElementById('end_time').value;
+
+    // Convert the input datetime to a date object
+    // Create current date object
+    const startTimeDate = new Date(start_time);
+    const currentTime = new Date();
+
+    // Check if the event startTime is in the past
+    if (startTimeDate < currentTime) {
+        alert('Cannot create an appointment in the past. Please choose a future date and time.');
+        return; // Stop the form submission
+    }
+
+    createEvent({ title, description, start_time, end_time });
+});
+
 
 function logout() {
     localStorage.removeItem("isLoggedIn");
@@ -84,6 +99,7 @@ function populateUpdateModel(event) {
     document.getElementById('updateEventId').value = event.event_id;
 }
 
+// Update an existing event (PUT Request)
 function updateEvent(eventId) {
     const payload = {};
     if(!eventId) return('no eventId');
@@ -125,14 +141,15 @@ function updateEvent(eventId) {
     })
 }
 
-// format datetime in prettier format
+// format datetime in a better user readable output
 function formatDate(dateString) {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleString('en-US', options);
 }
 
-function fetchEvents() {
-    fetch('/users/events', {
+// Get all events for User
+function fetchEvents(filter = '') {
+    fetch(`/users/events${filter ? `?filter=${filter}` : ''}`, {
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         },
@@ -140,14 +157,13 @@ function fetchEvents() {
     .then(response => response.json())
     .then(events => {
         const tableBody = document.querySelector('#eventTableBody');
-        tableBody.innerHTML = ''; // Clear the table body to remove previous rows
+        tableBody.innerHTML = ''; // Clear previous entries
 
         document.getElementById('close-button').onclick = () => {
             document.getElementById('updateModel').style.display = 'none'
         }
 
         events.forEach(event => {
-            console.log(event);
             const row = tableBody.insertRow(); // Create a new table row
 
             const titleCell = row.insertCell();
@@ -162,7 +178,7 @@ function fetchEvents() {
             const endCell = row.insertCell();
             endCell.textContent = formatDate(event.end_time);
 
-            // Create action cell for buttons
+            // Create action cell for update/delete buttons
             const actionCell = row.insertCell();
 
             // Create update button
@@ -179,7 +195,10 @@ function fetchEvents() {
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
             deleteButton.onclick = () => {
-                deleteEvent(event.event_id);
+                // Confirm with user before deleting event
+                if (confirm("Are you sure you want to delete this event?")) {
+                    deleteEvent(event.event_id);
+                }
             };
             actionCell.appendChild(deleteButton);
         });
@@ -187,6 +206,23 @@ function fetchEvents() {
     .catch(error => console.log('Error:', error));
 }
 
+// EvenListener's for filter option
+document.getElementById('filterAll').addEventListener('click', () => {
+    fetchEvents();
+    document.getElementById('currentFilter').textContent = 'Viewing All Appointments'; 
+});
+
+document.getElementById('filterUpcoming').addEventListener('click', () => {
+    fetchEvents('upcoming');
+    document.getElementById('currentFilter').textContent = 'Viewing Upcoming Appointments';
+});
+
+document.getElementById('filterPast').addEventListener('click', () => {
+    fetchEvents('past');
+    document.getElementById('currentFilter').textContent = 'Viewing Past Appointments';
+});
+
+// Delete user event
 function deleteEvent(eventId) {
     fetch(`/users/events/${eventId}`, {
         method: 'DELETE',
@@ -203,6 +239,7 @@ function deleteEvent(eventId) {
     })
     .then(data => {
         console.log('Event deleted successfully:', data);
+        alert('Event has been deleted successfully!')
         fetchEvents();  // Refresh the event list
     })
     .catch(error => {

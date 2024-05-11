@@ -11,11 +11,11 @@
         <h1>Welcome to the Appointment Manager</h1>
         <nav>
             <ul>
-                <!-- Content will be replaced by JavaScript, pending if user is logged or not -->
+                <!-- Content will be replaced by JS, pending if user is logged in or not -->
             </ul>
         </nav>
     </header>
-    <!-- hide if user is not logged in -->
+    <!-- Hide if user is not logged in -->
     <main style="display: none;">
         <div class="content-container">
             <section class="appointment-form">
@@ -42,6 +42,13 @@
             </section>
             <section id="appointment-list" class="appointment-list">
                 <h2>Your Appointments</h2>
+                <div>
+                    <button id="filterAll">All</button>
+                    <button id="filterUpcoming">Upcoming</button>
+                    <button id="filterPast">Past</button>
+                </div>
+                <!-- Change display header depending on filter -->
+                <h3 id="currentFilter">Viewing All Appointments</h3>            
                 <table>
                     <thead>
                         <tr>
@@ -53,12 +60,13 @@
                         </tr>
                     </thead>
                     <tbody id = eventTableBody>
-                        <!-- Update Event Modal -->
+                        <!-- Events will be populated here from JS -->
                     </tbody>
+                    <!-- Update Event model, hide until clicked -->
                     <div id="updateModel" class="model" style="display: none;">
                         <div class="model-content">
                             <span id="close-button" class="close-button" style="cursor: pointer;">×</span>
-                            <h2>Update Event</h2>
+                            <h3>Update Event</h3>
                             <form id="updateEventForm">
                                 <label for="updateTitle">Title:</label>
                                 <input type="text" id="updateTitle" name="title">

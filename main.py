@@ -27,6 +27,7 @@ app.mount("/static", StaticFiles(directory="frontend"), name="static")
 async def read_index():
     return {"message": "Visit /static/index.html to see the frontend"}
 
+# User login endpoint
 @app.post("/login")
 def login(
     user: LoginRequest, 
@@ -72,21 +73,21 @@ def login(
         raise HTTPException(status_code=500, detail="Internal server error")
    
 
-
+# User logut endpoint
 @app.post("/logout")
 def logout():
-    # For a logout endpoint with JWT, you don't need to do anything on the server side
+    # For logout endpoint there is JWT, so don't need to do anything on the server side
     # the client(front-end) discards the access token
     return {"message": "Logout successful"}
 
-
+# New Users register endpoint
 @app.post("/register")
 def register(
     req: RegisterRequest,
     db: sqlite3.Connection = Depends(get_db)
 ):
     cursor = db.cursor()
-    hashed_password = hash_password(req.password)
+    hashed_password = hash_password(req.password) # hash password
     try:
         cursor.execute(
             """
@@ -109,12 +110,13 @@ def register(
         else:
             raise HTTPException(status_code=500, detail="Internal Server Error")
 
+# User create new event endpoint
 @app.post("/users/create-event")
 def add_user_events(
     req: CreateEventRequest,
     user = Depends(get_current_user),  # get the current user
     db: sqlite3.Connection = Depends(get_db)
-):
+):    
     cursor = db.cursor()
   
     try:
@@ -154,33 +156,55 @@ def add_user_events(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-    
-@app.get("/users/events", response_model=List[Event])
+
+# Get Users events endpoint    
+@app.get("/users/events")
 def get_user_events(
+    filter: str = None,
     user = Depends(get_current_user),
     db: sqlite3.Connection = Depends(get_db)
 ):
     cursor = db.cursor()
+    current_time = datetime.now()
   
     try:
+        # Convert user_id from token to an int
         user_id = int(user["sub"])
-        cursor.execute(
-            """
-            SELECT event_id, title, description, start_time, end_time
-            FROM Events
-            WHERE user_id = ?
-            ORDER BY start_time ASC
-            """,
-            (user_id,)
-        )
-        rows = cursor.fetchall()
-        events = [Event(event_id=row[0], title=row[1], description=row[2], start_time=row[3], end_time=row[4]) for row in rows]
         
+        # User options for appointment viewing        
+        if filter == "upcoming":
+            cursor.execute(
+                """
+                SELECT * FROM Events WHERE user_id = ? 
+                AND start_time > ? ORDER BY start_time ASC
+                """, 
+                (user_id, current_time)
+            )
+        elif filter == "past":
+            cursor.execute(
+                """
+                SELECT * FROM Events WHERE user_id = ? 
+                AND start_time < ? ORDER BY start_time DESC
+                """, 
+                (user_id, current_time)
+            )
+        else:
+            cursor.execute(
+                """
+                SELECT * FROM Events WHERE user_id = ?
+                ORDER BY start_time ASC
+                """, 
+                (user_id,)
+            )
+
+        
+        events = cursor.fetchall()
         return events
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-    
+
+# User update existing event endpoint    
 @app.put("/users/events/{event_id}")
 def update_user_event(
     event_id: int,
@@ -197,6 +221,7 @@ def update_user_event(
         if not event or event[0] != user_id:
             raise HTTPException(status_code=404, detail="Event not found or not accessible")
 
+        # Dynamicaly create SQL query depending on which attributes user wants to update
         fields = {k: v for k, v in req.dict().items() if v is not None}
         if not fields:
             raise HTTPException(status_code=400, detail="No fields provided for update")
@@ -213,7 +238,8 @@ def update_user_event(
         raise HTTPException(status_code=400, detail="Invalid data provided")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
-    
+
+# User delete existing event endpoint    
 @app.delete("/users/events/{event_id}")
 def delete_user_event(
     event_id: int,
@@ -225,10 +251,10 @@ def delete_user_event(
     try:
         user_id = int(user["sub"])
         
-        # First, check if the event belongs to the user
+        # Check if the event belongs to the user
         cursor.execute(
             """
-            SELECT user_id FROM Events WHERE event_id = ?
+            SELECT user_id, start_time FROM Events WHERE event_id = ?
             """,
             (event_id,)
         )
@@ -237,6 +263,7 @@ def delete_user_event(
             raise HTTPException(status_code=404, detail="Event not found or not accessible")
 
         # If the event belongs to the user, proceed with deletion
+        # User confirmation done on the front-end
         cursor.execute(
             """
             DELETE FROM Events WHERE event_id = ? AND user_id = ?

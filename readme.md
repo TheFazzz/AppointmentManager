@@ -2,15 +2,15 @@
 
 ## Description
 
-Web app appoint manager with FastAPI backend and HTML, CSS, JS front-end and SQLite database
+Web app appointment manager with FastAPI for backend and HTML, CSS, JS front-end and SQLite database
 
 ## Getting Started
 
 ### Dependencies
 
-* Windows OS
-* Refer to Requirments.txt
-* Python 3
+* Windows, Linux, or Mac OS
+* Python 3.11 (older version may work still)
+* Refer to Requirments.txt(these will be installed bellow in Virtual Env)
 
 ### Installing
 
@@ -33,14 +33,20 @@ python -m pip install -r requirements.txt
 ```
 uvicorn main:app --reload
 ```
-* ctrl-c to stop server
-
-
 * How to access website(url):
 ```
 http://127.0.0.1:8000/static/index.html
 ```
-
+* Stop server: (run command)
+```
+crtl-c
+```
+* You can register a new account and login
+* Or you may use an existing account with data:
+```
+Email: david@gmail.com
+Password: Student1
+```
 ## Help
 
 Any advise for common problems or issues.
