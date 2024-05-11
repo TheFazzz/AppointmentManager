@@ -1,9 +1,11 @@
 import sqlite3
+# If you want to run any queries to test out  the database you may use this script
+# Once you put your SQL query in, to run just type command "python queryDB.py"
+# Python comes with Sqlite, so this is easier for you to test than having to download Sqlite
 
-# Connect to the database
 conn = sqlite3.connect('C:/CPSC431/AppointmentManager/database.db')
 
-# Create a cursor object
+
 cursor = conn.cursor()
 
 # Execute a query
