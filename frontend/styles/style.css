@@ -1,0 +1,228 @@
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+    color: #333; 
+}
+
+header {
+    background-color: #2C423F;
+    color: #C5C5C5;
+    padding: 10px 20px;
+    text-align: center;
+}
+
+h2, h3, h4 {
+    font-family: 'Merriweather', serif; 
+    color: #2c3e50; 
+}
+
+h2 {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+nav ul {
+    list-style-type: none; /* Removes bullet points from the list */
+    padding: 0; /* Removes padding around the list */
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 10px;
+}
+
+nav ul li a {
+    color: white; 
+    background-color: #899093; 
+    padding: 10px 15px; /* Adds padding around the text */
+    border-radius: 20px; /* Rounded corners to create a bubble effect */
+    text-decoration: none; /* Removes underline from links */
+    transition: background-color 0.3s; /* Smooth transition for hover effects */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+nav ul li a:hover {
+    background-color: #A7ABAC;
+    color: white; 
+}
+
+.content-container {
+    display: flex;
+    justify-content: space-between; 
+    padding: 20px;
+    gap: 20px; 
+    background-color: #949B96;
+}
+
+.appointment-form {
+    flex: 1 1 33%; /* Take up 1/3 of the flex width */
+    background: #C5C5C5;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    border-radius: 8px;
+}
+
+.appointment-list {
+    flex: 2 1 66%; /* Take up 2/3 of the flex width */
+    background: #C5C5C5;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2); 
+    border-radius: 8px;
+}
+
+.appointment-form .form-group input,
+.appointment-form .form-group textarea {
+    width: 70%;  
+    margin: 0 auto 10px; /* Centers the fields and adds margin below */
+    display: block; 
+    padding: 8px;  
+    border: 1px solid #ccc; /* border to the inputs */
+    border-radius: 4px; /* rounded corners to the inputs */
+}
+
+.appointment-form .form-group label {
+    display: block;
+    text-align: center; 
+    margin-bottom: 5px; 
+}
+
+.form-group {
+    margin-bottom: 15px; /* Spacing between each form group */
+}
+
+.form-group label {
+    display: block; /* Makes the label take up the full width, ensuring the input starts on a new line */
+    margin-bottom: 5px; /* Spacing between the label and the input */
+}
+
+form-group input[type="text"],
+.form-group input[type="datetime-local"],
+.form-group textarea {
+    width: 70%;
+    margin: 0 auto 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.appointment-form button {
+    width: 30%; 
+    padding: 10px;
+    margin: 20px auto; 
+}
+
+.appointment-list button {
+    width: 100%; 
+    padding: 5px;
+    margin: 5px auto; 
+}
+
+.filter-buttons button {
+    width: 50%; 
+    padding: 10px;
+    margin: 20px auto;
+    
+}
+
+.model-content button {
+    width: 100%; 
+    padding: 10px;
+    margin: 20px auto;
+    
+}
+
+button {
+    background-color: #2C423F; 
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    transition: background-color 0.3s; /* Smooth transition for hover effects */
+}
+
+button:hover {
+    background-color: #606F6B;
+}
+
+table {
+    width: 100%; /* Full-width to use available space */
+    border-collapse: collapse; /* Collapses border to avoid double borders */
+    margin: 20px 0; 
+    box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+    border-radius: 8px; /* Rounded corners for the table */
+    overflow: hidden; 
+
+}
+
+th, td {
+    border-bottom: 1px solid #ddd; /* Light border for separating rows */
+    padding: 8px;
+    text-align: left;
+    font-weight: 500;
+}
+
+th {
+    background-color: #2C423F;
+    color: #C5C5C5;
+    font-weight: bold; 
+}
+
+th.title {
+    font-weight: bold;
+    color: white;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #899093; /* Change background every other row */
+}
+
+.model {
+    position: fixed; /* Positions the modal relative to the viewport */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centers the modal */
+    width: 90%; /* Responsive width */
+    max-width: 400px; /* Reduced maximum width */
+    min-height: 300px; /* Sets a minimum height to make the modal taller */
+    background: white;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 1000; /* Ensures it's above other content */
+    display: none; /* Hide by default */
+}
+
+.model label {
+    display: block; 
+    margin-bottom: 5px;
+}
+
+.model-content {
+    margin: 20px;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+footer {
+    text-align: center;
+    padding: 10px 0;
+    background-color: #2C423F;
+    color: #C5C5C5;
+}
+
+.nav, .footer {
+    font-family: 'Merriweather', serif; 
+    font-size: 18px;
+}

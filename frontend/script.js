@@ -167,15 +167,19 @@ function fetchEvents(filter = '') {
             const row = tableBody.insertRow(); // Create a new table row
 
             const titleCell = row.insertCell();
+            titleCell.className = 'title';
             titleCell.textContent = event.title;
 
             const descriptionCell = row.insertCell();
+            descriptionCell.className = 'description'
             descriptionCell.textContent = event.description || 'No description';
 
             const startCell = row.insertCell();
+            startCell.className = 'time';
             startCell.textContent = formatDate(event.start_time);
 
             const endCell = row.insertCell();
+            endCell.className = 'time';
             endCell.textContent = formatDate(event.end_time);
 
             // Create action cell for update/delete buttons
