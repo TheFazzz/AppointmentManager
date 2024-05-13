@@ -123,9 +123,14 @@ form-group input[type="text"],
 
 .filter-buttons button {
     width: 50%; 
-    padding: 10px;
-    margin: 20px auto;
-    
+    padding: 10px;    
+}
+
+.filter-buttons {
+    display: flex; 
+    justify-content: center; 
+    gap: 5px; 
+    margin-bottom: 2px; 
 }
 
 .model-content button {
@@ -153,7 +158,6 @@ button:hover {
 table {
     width: 100%; /* Full-width to use available space */
     border-collapse: collapse; /* Collapses border to avoid double borders */
-    margin: 20px 0; 
     box-shadow: 0 2px 15px rgba(0,0,0,0.2);
     border-radius: 8px; /* Rounded corners for the table */
     overflow: hidden; 
@@ -226,3 +230,4 @@ footer {
     font-family: 'Merriweather', serif; 
     font-size: 18px;
 }
+
