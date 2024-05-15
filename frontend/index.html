@@ -10,16 +10,42 @@
 </head>
 <body>
     <header>
-        <h1>Welcome to the Appointment Manager</h1>
-        <nav>
-            <ul>
-                <!-- Content will be replaced by JS, pending if user is logged in or not -->
-            </ul>
-        </nav>
+        <div class="header-section left">
+            <div id="greeting" class="greeting">Hello Guest</div>
+        </div>
+        <div class="header-section center">
+            <h1>Welcome to the Appointment Manager</h1>
+        </div>
+        <div class="header-section right">
+            <nav>
+                <ul>
+                    <!-- Content will be replaced by JS, pending if user is logged in or not -->
+                </ul>
+            </nav>
+        </div>
     </header>
+    
     <!-- Hide if user is not logged in -->
     <main style="display: none;">
         <div class="content-container">
+            <!-- Profile Update Modal -->
+            <div id="profileModel" class="updateModel" style="display: none;">
+                <div class="profileModel-content">
+                    <span id="p-close-button" class="p-close-button" style="cursor: pointer;">×</span>
+                    <h2>Update Profile</h2>
+                    <form id="updateProfileForm">
+                        <label for="firstName">First Name:</label>
+                        <input type="text" id="firstName" placeholder="Update first name" name="firstName">
+                        <label for="lastName">Last Name:</label>
+                        <input type="text" id="lastName" placeholder="Update last name" name="lastName">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" placeholder="Update email" name="email">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" placeholder="Update password" name="password">
+                        <button type="submit">Update</button>
+                    </form>
+                </div>
+            </div>
             <section class="appointment-form">
                 <h2>Create Appointment</h2>
                 <form id="createEventForm">
@@ -64,14 +90,22 @@
                     <tbody id = eventTableBody>
                         <!-- Events will be populated here from JS -->
                     </tbody>
+                    <div id="alertModal" class="modal" style="display: none;">
+                        <div class="modal-content">
+                            <span class="close-button" onclick="closeModal()">×</span>
+                            <h3 id="alertTitle">Alert</h3>
+                            <p id="alertMessage"></p>
+                            <div id="modalButtons"></div>
+                        </div>
+                    </div>
                     <!-- Update Event model, hide until clicked -->
-                    <div id="updateModel" class="model" style="display: none;">
-                        <div class="model-content">
+                    <div id="updateModel" class="updateModel" style="display: none;">
+                        <div class="updateModel-content">
                             <span id="close-button" class="close-button" style="cursor: pointer;">×</span>
                             <h3>Update Event</h3>
                             <form id="updateEventForm">
                                 <label for="updateTitle">Title:</label>
-                                <input type="text" id="updateTitle" name="title">
+                                <input type="text" id="updateTitle" placeholder="Update title" name="title">
 
                                 <label for="updateDescription">Description:</label>
                                 <textarea id="updateDescription" name="description" placeholder="Update description"></textarea>

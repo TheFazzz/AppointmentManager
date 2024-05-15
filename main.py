@@ -109,6 +109,35 @@ def register(
             raise HTTPException(status_code=400, detail="Email is already in use")
         else:
             raise HTTPException(status_code=500, detail="Internal Server Error")
+ 
+# Update user info endpoint       
+@app.put("/users/user", response_model=dict)
+def update_user(
+    req: UpdateUserRequest,
+    user = Depends(get_current_user),
+    db: sqlite3.Connection = Depends(get_db)
+):
+    user_id = int(user['sub'])
+    cursor = db.cursor()
+    
+    update_data = req.dict(exclude_unset=True)
+    
+    if 'password' in update_data:
+        update_data['password_hash'] = hash_password(update_data['password'])
+        del update_data['password']  # Remove plain password from dict
+
+    if update_data:
+        set_clause = ', '.join([f"{key} = ?" for key in update_data.keys()])
+        values = list(update_data.values()) + [user_id]
+
+        # Dynamically create SQL based on provided fields
+        cursor.execute(f"UPDATE Users SET {set_clause} WHERE user_id = ?", values)
+        cursor.connection.commit()
+        return {"message": "User updated successfully"}
+    else:
+        raise HTTPException(status_code=400, detail="No valid fields provided for update")
+
+
 
 # User create new event endpoint
 @app.post("/users/create-event")
@@ -122,13 +151,19 @@ def add_user_events(
     try:
         user_id = int(user["sub"])
         
-        # Check for overlaping event times
+        # Check for overlapping event times
+        # Event starts before and ends after the new event
+        # Event starts within the new event
+        # Event ends within the new event
         cursor.execute(
             """
-            SELECT 1 FROM Events WHERE user_id = ?
-            AND NOT (end_time <= ? OR start_time >= ?)
+            SELECT 1 FROM Events WHERE user_id = ? AND (
+                (start_time <= ? AND end_time >= ?) OR 
+                (start_time >= ? AND start_time < ?) OR
+                (end_time > ? AND end_time <= ?)
+            )
             """,
-            (user_id, req.start_time, req.end_time)
+            (user_id, req.start_time, req.end_time, req.start_time, req.end_time, req.start_time, req.end_time)
         )
         if cursor.fetchone():
             raise HTTPException(status_code=400, detail="Event times overlap with an existing event")
@@ -215,12 +250,32 @@ def update_user_event(
     user_id = int(user["sub"])
     cursor = db.cursor()
     try:
-        cursor.execute("SELECT user_id FROM Events WHERE event_id = ?", (event_id,))
+        cursor.execute("SELECT user_id, start_time, end_time FROM Events WHERE event_id = ?", (event_id,))
         event = cursor.fetchone()
         
         if not event or event[0] != user_id:
             raise HTTPException(status_code=404, detail="Event not found or not accessible")
 
+        if req.start_time or req.end_time:
+            start_time = req.start_time if req.start_time else event['start_time']
+            end_time = req.end_time if req.end_time else event['end_time']
+            # Event starts before and ends after the new event
+            # Event starts within the new event
+            # Event ends within the new event
+            cursor.execute(
+                """
+                SELECT 1 FROM Events WHERE user_id = ? AND event_id != ? AND (
+                    (start_time < ? AND end_time > ?) OR
+                    (start_time > ? AND start_time < ?) OR
+                    (end_time > ? AND end_time < ?)
+                )
+                """,
+                (user_id, event_id, end_time, start_time, start_time, end_time, start_time, end_time)
+            )
+            if cursor.fetchone():
+                raise HTTPException(status_code=400, detail="Event times overlap with an existing event")
+
+        
         # Dynamicaly create SQL query depending on which attributes user wants to update
         fields = {k: v for k, v in req.dict().items() if v is not None}
         if not fields:
@@ -228,7 +283,7 @@ def update_user_event(
         
         set_clause = ", ".join([f"{key} = ?" for key in fields])
         values = list(fields.values()) + [event_id, user["sub"]]
-    
+
         cursor.execute(f"UPDATE Events SET {set_clause} WHERE event_id = ? AND user_id = ?", values)
         db.commit()
         return {"message": "Event updated successfully"}

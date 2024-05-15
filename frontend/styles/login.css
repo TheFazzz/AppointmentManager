@@ -6,7 +6,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center; 
-    height: 100vh; /* Full viewport height */
+    height: 100vh; 
 }
 
 .container {
@@ -67,7 +67,6 @@ button:hover {
     background-color: #606F6B; 
 }
 
-/* Error message styling */
 #error-message {
     color: red;
     text-align: center;

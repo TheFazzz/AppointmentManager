@@ -43,6 +43,10 @@ http://127.0.0.1:8000/static/index.html
 Email: david@gmail.com
 Password: Student1
 ```
+* User may create new events
+* User can update/delete existing events
+* User can update their info(click profile top right)
+* Filter appointments (All, Upcoming, Past)
 * To Stop server: (run command)
 ```
 crtl-c

@@ -12,6 +12,12 @@ class RegisterRequest(BaseModel):
     last_name: str
     email: str
     password: str
+    
+class UpdateUserRequest(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
 
 class CreateEventRequest(BaseModel):
     title: str
