@@ -4,6 +4,8 @@
 
 Web app appointment manager with FastAPI for backend and HTML, CSS, JS front-end and SQLite database
 
+![Screenshot 2024-05-15 023323](https://github.com/TheFazzz/AppointmentManager/assets/54519417/daf1e3a7-7939-462c-b688-69304ea29796)
+
 ## Getting Started
 
 ### Dependencies
