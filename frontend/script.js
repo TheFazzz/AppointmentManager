@@ -120,7 +120,6 @@ form.addEventListener('submit', function(event) {
     createEvent({ title, description, start_time, end_time });
 });
 
-// POST for user to create new events
 function createEvent(eventData) {
     fetch('/users/create-event', {
         method: 'POST',
@@ -130,25 +129,34 @@ function createEvent(eventData) {
         },
         body: JSON.stringify(eventData)
     })
-    .then(response => {
+    .then(response => response.json().then(data => {
         if (!response.ok) {
-            return response.json().then(data => {
-                showAlert("Error", "Failed to create the event due to a scheduling conflict or other issue", false);
-                throw new Error("Failed to create event");
-            });
+            // check the specific error message from backend
+            let errorMessage = "Failed to create the event due to a scheduling conflict or other issue";
+            if (data.detail) {
+                // Handle specific backend errors 
+                if (data.detail.includes("Event end time before start time")) {
+                    errorMessage = "Event end time cannot be earlier than the start time.";
+                } else if (data.detail.includes("Event times overlap")) {
+                    errorMessage = "Event times overlap with an existing event. Please choose a different time.";
+                } else {
+                    errorMessage = data.detail; // Fallback to the generic detail provided by the API
+                }
+            }
+            showAlert("Error", errorMessage, false);
+            throw new Error(errorMessage); // Prevent further processing
         }
-        return response.json();
-    })    .then(data => {
-        showAlert("Success","Event created successfully!", false);
+        // If the request was successful
+        showAlert("Success", "Event created successfully!", false);
         document.getElementById('createEventForm').reset(); // Reset the form
         fetchEvents(); // Reload events after creation
-        
-    })
+    }))
     .catch((error) => {
         console.error('Error:', error);
-        showAlert("Error", "An unexpected error occurred while creating event.", false); 
+        showAlert("Error", error.toString(), false); 
     });
 }
+
 
 // close update event form
 document.querySelectorAll('.close-button').forEach(button => {
@@ -167,20 +175,42 @@ document.getElementById('updateEventForm').addEventListener('submit', function(e
 // Update an existing event (PUT Request)
 function updateEvent(eventId) {
     const payload = {};
-    if(!eventId) return('no eventId');
-    // Retrieve values from the form and add to payload if non-empty
+    if (!eventId) {
+        showAlert("Error", "No event ID provided.", false);
+        return;
+    }
+
+    // Retrieve values from the form 
     const title = document.getElementById('updateTitle').value;
     const description = document.getElementById('updateDescription').value;
-
-    if (title) payload.title = title;
-    if (description) payload.description = description;
-
     const startTime = document.getElementById('updateStartTime').value;
     const endTime = document.getElementById('updateEndTime').value;
 
+    // payload for the fields provided
+    if (title) payload.title = title;
+    if (description) payload.description = description;
     if (startTime) payload.start_time = startTime;
     if (endTime) payload.end_time = endTime;
 
+    // validation if both times are provided
+    if (startTime && endTime) {
+        const startTimeDate = new Date(startTime);
+        const endTimeDate = new Date(endTime);
+        const currentTime = new Date();
+
+        // user invalid input checks
+        if (startTimeDate > endTimeDate) {
+            showAlert("Error", "Start time cannot be later than end time.", false);
+            return;
+        }
+
+        if (startTimeDate < currentTime || endTimeDate < currentTime) {
+            showAlert("Error", "Cannot set event times in the past.", false);
+            return;
+        }
+    }
+
+    // Perform the PUT request
     fetch(`/users/events/${eventId}`, {
         method: 'PUT',
         headers: {
@@ -189,28 +219,25 @@ function updateEvent(eventId) {
         },
         body: JSON.stringify(payload)
     })
-    .then(response => {
+    .then(response => response.json().then(data => {
         if (!response.ok) {
-            return response.json().then(data => {
-                showAlert("Error", data.detail || "Failed to update event. Please try again", false);
-                throw new Error("Failed to update event");
-            });
+            let errorMessage = data.detail || "Failed to update event. Please try again.";
+            showAlert("Error", errorMessage, false);
+            throw new Error(errorMessage); // Stop further processing and display the error
         }
-        return response.json();
-    })
+        return data; // If no error, pass the data to the next then()
+    }))
     .then(data => {
         showAlert("Success", "Event updated successfully", false);
-        document.getElementById('updateEventForm').reset(); // Reset the form
+        document.getElementById('updateEventForm').reset(); // Reset the form on successful update
         document.getElementById('updateModel').style.display = 'none';
         fetchEvents();  // Refresh the event list
     })
     .catch(error => {
         console.error('Error updating event:', error);
-        // If an error reaches here, it means it wasn't caught in the non-ok response block
-        showAlert("Error", "An unexpected error occurred while updating the event.", false);
-
-    })
+    });
 }
+
 
 // format datetime in a better user readable output
 function formatDate(dateString) {
@@ -316,7 +343,7 @@ async function deleteEvent(eventId) {
         fetchEvents();  // Refresh the event list
     } catch (error) {
         console.error('Error deleting event:', error);
-        showAlert("Error", 'Failed to delete event: ' + error.message, false);
+        showAlert("Error", 'Failed to delete event: ', false);
     }
 }
 
@@ -354,7 +381,6 @@ function showAlert(title, message, canConfirm, onConfirm) {
 
     modal.style.display = "flex";
 }
-
 
 function closeModal() {
     const modal = document.getElementById('alertModal');

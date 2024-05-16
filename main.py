@@ -151,6 +151,10 @@ def add_user_events(
     try:
         user_id = int(user["sub"])
         
+        # check if end-time is before start time
+        if req.start_time > req.end_time:
+            raise HTTPException(status_code=400, detail="Event end time before start time")
+        
         # Check for overlapping event times
         # Event starts before and ends after the new event
         # Event starts within the new event
