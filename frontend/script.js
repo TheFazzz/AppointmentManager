@@ -15,13 +15,12 @@ if (token) {
     const userName = payload.first_name;
     document.getElementById('greeting').textContent = `Hello ${userName}`;
 }
-
+// Render page depending user login
 document.addEventListener("DOMContentLoaded", function() {
     const nav = document.querySelector('nav ul');
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     const main = document.querySelector('main');
 
-    // render data depending on if user is logged in or not
     if (isLoggedIn === "true") {
         main.style.display = 'block';
         nav.innerHTML = `
@@ -30,7 +29,6 @@ document.addEventListener("DOMContentLoaded", function() {
         `;
         fetchEvents();
 
-        // Adding the listener inside DOMContentLoaded after setting innerHTML
         document.getElementById("profileLink").addEventListener("click", function() {
             document.getElementById("profileModel").style.display = "block";
         });
@@ -107,9 +105,8 @@ form.addEventListener('submit', function(event) {
     const end_time = document.getElementById('end_time').value;
 
     // Convert the input datetime to a date object
-    // Create current date object
     const startTimeDate = new Date(start_time);
-    const currentTime = new Date();
+    const currentTime = new Date();     // create current date obj
 
     // Check if the event startTime is in the past
     if (startTimeDate < currentTime) {
@@ -144,7 +141,7 @@ function createEvent(eventData) {
                 }
             }
             showAlert("Error", errorMessage, false);
-            throw new Error(errorMessage); // Prevent further processing
+            throw new Error(errorMessage);
         }
         // If the request was successful
         showAlert("Success", "Event created successfully!", false);
@@ -153,7 +150,7 @@ function createEvent(eventData) {
     }))
     .catch((error) => {
         console.error('Error:', error);
-        showAlert("Error", error.toString(), false); 
+        showAlert("Error", errorMessage, false); 
     });
 }
 
@@ -189,10 +186,8 @@ function updateEvent(eventId) {
     // payload for the fields provided
     if (title) payload.title = title;
     if (description) payload.description = description;
-    if (startTime) payload.start_time = startTime;
-    if (endTime) payload.end_time = endTime;
-
-    // validation if both times are provided
+    
+    // Check both time fields are either provided or both not provided
     if (startTime && endTime) {
         const startTimeDate = new Date(startTime);
         const endTimeDate = new Date(endTime);
@@ -203,13 +198,20 @@ function updateEvent(eventId) {
             showAlert("Error", "Start time cannot be later than end time.", false);
             return;
         }
-
+        // check if in the past
         if (startTimeDate < currentTime || endTimeDate < currentTime) {
             showAlert("Error", "Cannot set event times in the past.", false);
             return;
         }
+        payload.start_time = startTime;
+        payload.end_time = endTime;
+    } else if (!startTime && !endTime) {
+        // If neither are provided, that's okay if the user isn't updating times.
+    } else {
+        showAlert("Error", "Both start time and end time must be updated together.", false);
+        return; 
     }
-
+    
     // Perform the PUT request
     fetch(`/users/events/${eventId}`, {
         method: 'PUT',
@@ -221,20 +223,28 @@ function updateEvent(eventId) {
     })
     .then(response => response.json().then(data => {
         if (!response.ok) {
-            let errorMessage = data.detail || "Failed to update event. Please try again.";
+            // check the specific error message from backend
+            let errorMessage = "Failed to create the event due to a scheduling conflict or other issue";
+            if (data.detail) {
+                // Handle specific backend errors 
+                if (data.detail.includes("Event times overlap with an existing event")) {
+                    errorMessage = "Event times overlap with an existing event";
+                } else {
+                    errorMessage = data.detail; // Fallback to the generic detail provided by the API
+                }
+            }
             showAlert("Error", errorMessage, false);
-            throw new Error(errorMessage); // Stop further processing and display the error
+            throw new Error(errorMessage); // Prevent further processing
         }
-        return data; // If no error, pass the data to the next then()
+        // If the request was successful
+        showAlert("Success", "Event updated successfully!", false);
+        document.getElementById('updateEventForm').reset(); // Reset the form
+        document.getElementById("updateModel").style.display = "none"; // Close the model on successful update
+        fetchEvents(); // Reload events after creation
     }))
-    .then(data => {
-        showAlert("Success", "Event updated successfully", false);
-        document.getElementById('updateEventForm').reset(); // Reset the form on successful update
-        document.getElementById('updateModel').style.display = 'none';
-        fetchEvents();  // Refresh the event list
-    })
     .catch(error => {
         console.error('Error updating event:', error);
+        showAlert("Error", errorMessage, false);
     });
 }
 

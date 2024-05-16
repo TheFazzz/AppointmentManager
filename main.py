@@ -260,7 +260,7 @@ def update_user_event(
         if not event or event[0] != user_id:
             raise HTTPException(status_code=404, detail="Event not found or not accessible")
 
-        if req.start_time or req.end_time:
+        if req.start_time and req.end_time:
             start_time = req.start_time if req.start_time else event['start_time']
             end_time = req.end_time if req.end_time else event['end_time']
             # Event starts before and ends after the new event
@@ -294,9 +294,9 @@ def update_user_event(
 
     except sqlite3.IntegrityError as e:
         db.rollback()
-        raise HTTPException(status_code=400, detail="Invalid data provided")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {e}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 # User delete existing event endpoint    
 @app.delete("/users/events/{event_id}")
@@ -322,7 +322,6 @@ def delete_user_event(
             raise HTTPException(status_code=404, detail="Event not found or not accessible")
 
         # If the event belongs to the user, proceed with deletion
-        # User confirmation done on the front-end
         cursor.execute(
             """
             DELETE FROM Events WHERE event_id = ? AND user_id = ?
